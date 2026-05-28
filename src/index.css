@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply text-white font-sans overflow-x-hidden;
+  /* Fundo com gradiente escuro e profundo, combinando com o roxo */
+  background: linear-gradient(135deg, #09090e 0%, #17102b 50%, #0c0b14 100%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism effect */
+.glass {
+  @apply bg-white border border-white rounded-xl;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Glow effect for purple elements */
+.glow-purple {
+  text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.glow-purple-light {
+  text-shadow: 0 0 15px rgba(167, 139, 250, 0.2);
+  box-shadow: 0 0 15px rgba(167, 139, 250, 0.15);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(to right, #a78bfa, #8b5cf6, #6d28d9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  color: white;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+}
+
+.btn-secondary {
+  @apply px-8 py-3 rounded-lg font-semibold border-2 border-purple-main text-purple-light transition-all duration-300 hover:bg-purple-main hover:text-white;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-purple-main rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-purple-light;
+}
+
+/* Enhanced Stars background animation with Parallax */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 60px 70px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 50px 50px, #d1d5db, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 130px 80px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90px 10px, rgba(255,255,255,0.6), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: -1;
+  /* Animação suave da primeira camada */
+  animation: starMovement 60s linear infinite;
+  opacity: 0.7;
+}
+
+/* Segunda camada de estrelas (menores e mais lentas) para dar profundidade */
+.stars::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(1px 1px at 40px 60px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 110px 20px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 160px 140px, rgba(255,255,255,0.5), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 300px 300px;
+  /* Animação mais lenta para o efeito parallax */
+  animation: starMovement 120s linear infinite;
+}
+
+/* Smooth transitions */
+a, button {
+  transition: all 0.3s ease-in-out;
+}
+
+/* GPU acceleration for animations */
+.glass, button, a {
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+button:active, a:active {
+  will-change: transform;
+}
+
+/* Canvas and 3D styling */
+canvas {
+  display: block;
+  background: transparent !important;
+}
+
+/* Optimize video performance */
+video {
+  will-change: auto;
+  transform: translateZ(0);
+  background: transparent !important;
+  filter: drop-shadow(0 20px 60px rgba(139, 92, 246, 0.4)) drop-shadow(0 10px 30px rgba(167, 139, 250, 0.2));
+  image-rendering: auto;
+  -webkit-filter: drop-shadow(0 20px 60px rgba(139, 92, 246, 0.4)) drop-shadow(0 10px 30px rgba(167, 139, 250, 0.2));
+}
+
+/* Custom animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Keyframes do movimento do background */
+@keyframes starMovement {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -1000px 1000px;
+  }
+}
+
+/* Enhanced hover effects */
+button:hover, a:hover {
+  filter: brightness(1.1);
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  
+  .glass {
+    backdrop-filter: blur(8px);
+  }
+}
