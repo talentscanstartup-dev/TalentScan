@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
 const Model3D = () => {
   const floatingVariants = {
@@ -28,7 +29,7 @@ const Model3D = () => {
   )
 }
 
-const Navbar = () => {
+const Navbar = ({ onLoginClick, onRegisterClick }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -70,30 +71,44 @@ const Navbar = () => {
             <span className="text-xl font-bold text-white hidden sm:inline">Talent Scan</span>
           </motion.div>
 
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <motion.a
-                key={link.label}
-                href={link.href}
-                className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
+          {/* Links e Botões Desktop */}
+          <div className="hidden md:flex items-center gap-6">
+            <div className="flex items-center gap-8">
+              {navLinks.map((link) => (
+                <motion.a
+                  key={link.label}
+                  href={link.href}
+                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {link.label}
+                </motion.a>
+              ))}
+            </div>
+            
+            {/* Divisor e Botões de Ação */}
+            <div className="flex items-center gap-4 border-l border-dark-border pl-6">
+              <motion.button
+                onClick={onLoginClick}
+                className="text-white hover:text-purple-light transition-colors text-sm font-medium"
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {link.label}
-              </motion.a>
-            ))}
+                Entrar
+              </motion.button>
+
+              <motion.button
+                onClick={onRegisterClick}
+                className="btn-primary px-6 py-2 text-sm"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Cadastro
+              </motion.button>
+            </div>
           </div>
 
-          <motion.a
-            href="https://web.telegram.org/a/#8790543248"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:block btn-primary px-6 py-2 text-sm"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Testar no Telegram
-          </motion.a>
-
+          {/* Botão Hamburger Mobile */}
           <motion.button
             className="md:hidden flex flex-col gap-1.5 relative w-8 h-8"
             onClick={() => setIsOpen(!isOpen)}
@@ -113,6 +128,7 @@ const Navbar = () => {
           </motion.button>
         </div>
 
+        {/* Menu Mobile */}
         <motion.div
           className="md:hidden mt-4 overflow-hidden"
           animate={isOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
@@ -129,15 +145,27 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            <a
-              href="https://web.telegram.org/a/#8790543248"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary px-6 py-2 text-sm w-full text-center"
-              onClick={() => setIsOpen(false)}
-            >
-              Testar no Telegram
-            </a>
+            
+            <div className="flex flex-col gap-2 pt-2 border-t border-dark-border/50">
+              <motion.button
+                onClick={() => {
+                  setIsOpen(false)
+                  onLoginClick()
+                }}
+                className="text-white bg-white/5 hover:bg-white/10 transition-colors border border-white/10 rounded-lg px-6 py-2 text-sm w-full text-center font-medium"
+              >
+                Entrar
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  setIsOpen(false)
+                  onRegisterClick()
+                }}
+                className="btn-primary px-6 py-2 text-sm w-full text-center"
+              >
+                Cadastro
+              </motion.button>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -273,25 +301,25 @@ const Stats = () => {
 
   const stats = [
     {
-      icon: "⚡",
+      icon: "lightning",
       label: "Tempo Economizado",
       value: "80%",
       description: "redução no tempo de triagem"
     },
     {
-      icon: "✓",
+      icon: "check",
       label: "Taxa de Acerto",
       value: "98%",
       description: "de precisão nas análises"
     },
     {
-      icon: "✓",
+      icon: "check",
       label: "ROI Médio",
       value: "12x",
       description: "retorno do investimento"
     },
     {
-      icon: "✓",
+      icon: "check",
       label: "Velocidade",
       value: "<10s",
       description: "por CV analisado"
@@ -722,7 +750,7 @@ const Testimonials = () => {
               <div className="glass p-8 rounded-xl h-full flex flex-col group hover:border-purple-main transition-all duration-300">
                 <div className="flex gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">★</span>
+                    <div key={i} className="w-4 h-4 bg-yellow-400 rounded-full"></div>
                   ))}
                 </div>
                 <p className="text-gray-300 italic leading-relaxed flex-grow mb-6">
@@ -758,7 +786,10 @@ const Testimonials = () => {
               <p className="text-gray-400 text-sm">Satisfação</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl md:text-4xl font-bold gradient-text mb-2">4.9★</p>
+              <div className="flex items-center gap-2 mb-2">
+                <p className="text-3xl md:text-4xl font-bold gradient-text">4.9</p>
+                <div className="w-5 h-5 bg-yellow-400 rounded-full mt-1"></div>
+              </div>
               <p className="text-gray-400 text-sm">Rating Médio</p>
             </div>
           </div>
@@ -937,9 +968,7 @@ const Pricing = () => {
                 <div className="space-y-4 flex-grow">
                   {plan.features.map((feature, idx) => (
                     <div key={idx} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-purple-main to-purple-light flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-white text-xs">✓</span>
-                      </div>
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-r from-purple-main to-purple-light flex items-center justify-center flex-shrink-0 mt-0.5"></div>
                       <span className="text-gray-300 text-sm">{feature}</span>
                     </div>
                   ))}
@@ -1235,8 +1264,8 @@ const TechStack = () => {
               <p className="text-gray-400 text-sm text-center">Usuário envia CV</p>
             </div>
 
-            <div className="hidden md:block text-purple-light text-3xl">
-              →
+            <div className="hidden md:block text-purple-light px-4">
+              <div className="w-8 h-px bg-gradient-to-r from-purple-light to-transparent"></div>
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-4">
@@ -1247,8 +1276,8 @@ const TechStack = () => {
               <p className="text-gray-400 text-sm text-center">Análise automática</p>
             </div>
 
-            <div className="hidden md:block text-purple-main text-3xl">
-              →
+            <div className="hidden md:block text-purple-main px-4">
+              <div className="w-8 h-px bg-gradient-to-r from-purple-main to-transparent"></div>
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-4">
@@ -1265,18 +1294,16 @@ const TechStack = () => {
               <motion.div 
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-purple-main text-2xl"
+                className="w-1 h-6 bg-purple-main mx-auto"
               >
-                ↓
               </motion.div>
             </div>
             <div className="flex-1">
               <motion.div 
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                className="text-purple-light text-2xl"
+                className="w-1 h-6 bg-purple-light mx-auto"
               >
-                ↓
               </motion.div>
             </div>
           </div>
@@ -1287,7 +1314,7 @@ const TechStack = () => {
           className="mt-12 p-6 md:p-8 rounded-xl border border-dark-border bg-gradient-to-r from-purple-main/5 via-purple-dark/5 to-purple-light/5"
         >
           <div className="flex gap-4 items-start">
-            <div className="text-2xl flex-shrink-0">✓</div>
+            <div className="w-6 h-6 bg-gradient-to-r from-purple-main to-purple-light rounded flex-shrink-0 mt-1"></div>
             <div>
               <h4 className="font-bold text-white mb-2">Inteligência Integrada</h4>
               <p className="text-gray-400">
@@ -1604,13 +1631,23 @@ const Footer = () => {
 }
 
 function App() {
+  const navigate = useNavigate()
+
+  const handleLoginClick = () => {
+    navigate('/login')
+  }
+
+  const handleRegisterClick = () => {
+    navigate('/register')
+  }
+
   return (
     <div className="min-h-screen bg-dark-bg">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 stars"></div>
       </div>
 
-      <Navbar />
+      <Navbar onLoginClick={handleLoginClick} onRegisterClick={handleRegisterClick} />
       <HeroSection />
       <Stats />
       <HowItWorks />
