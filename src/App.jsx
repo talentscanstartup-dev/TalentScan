@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { Briefcase, Loader2, Mail, CheckCircle, MessageCircle, BookOpen, Zap, CheckCircle2, TrendingUp, Timer, FileText, Sparkles, BrainCircuit } from 'lucide-react'
 
-const Model3D = () => {
+const Model3D = ({ scale = 1 }) => {
   const floatingVariants = {
     animate: {
       y: [0, -20, 0],
       transition: {
         duration: 3,
-        repeat: 0,
+        repeat: Infinity,
         ease: "easeInOut",
       },
     },
@@ -17,12 +18,13 @@ const Model3D = () => {
   return (
     <motion.div
       animate={floatingVariants.animate}
-      className="w-full h-full flex items-center justify-center min-h-[500px]"
+      className="w-full h-full flex items-center justify-center"
+      style={{ transform: `scale(${scale})` }}
     >
       <img 
         src="/imagens/robotscan.png" 
         alt="Robot Talent Scan"
-        className="max-w-full max-h-full object-contain drop-shadow-2xl"
+        className="w-full max-w-[400px] lg:max-w-[500px] object-contain drop-shadow-2xl"
         style={{ filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.3))' }}
       />
     </motion.div>
@@ -44,6 +46,7 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
   const navLinks = [
     { label: 'Como Funciona', href: '#como-funciona' },
     { label: 'Benefícios', href: '#beneficios' },
+    { label: 'Criar Currículo', href: '/criar-curriculo', isRoute: true },
     { label: 'Preços', href: '#precos' },
     { label: 'FAQ', href: '#faq' },
   ]
@@ -75,14 +78,26 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
           <div className="hidden md:flex items-center gap-6">
             <div className="flex items-center gap-8">
               {navLinks.map((link) => (
-                <motion.a
-                  key={link.label}
-                  href={link.href}
-                  className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  {link.label}
-                </motion.a>
+                link.isRoute ? (
+                  <motion.a
+                    key={link.label}
+                    href={link.href}
+                    className="text-purple-400 hover:text-purple-300 transition-colors duration-300 text-sm font-semibold flex items-center gap-1.5"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <FileText size={14} />
+                    {link.label}
+                  </motion.a>
+                ) : (
+                  <motion.a
+                    key={link.label}
+                    href={link.href}
+                    className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {link.label}
+                  </motion.a>
+                )
               ))}
             </div>
             
@@ -139,9 +154,12 @@ const Navbar = ({ onLoginClick, onRegisterClick }) => {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium"
+                className={`transition-colors duration-300 text-sm font-medium ${
+                  link.isRoute ? 'text-purple-400 hover:text-purple-300 flex items-center gap-1.5' : 'text-gray-300 hover:text-white'
+                }`}
                 onClick={() => setIsOpen(false)}
               >
+                {link.isRoute && <FileText size={14} />}
                 {link.label}
               </a>
             ))}
@@ -207,64 +225,67 @@ const HeroSection = () => {
         initial="hidden"
         animate="visible"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
-          <motion.div className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+          <motion.div className="flex flex-col gap-8">
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass w-fit border-purple-500/30 bg-purple-500/10 mb-2">
+              <Sparkles size={16} className="text-purple-400" />
+              <span className="text-sm font-medium text-purple-200">A nova era do recrutamento chegou</span>
+            </motion.div>
+            
             <motion.h1 
               variants={itemVariants}
-              className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
+              className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight drop-shadow-2xl"
             >
-              <span className="gradient-text">Triagem de Currículos</span>
-              <br />
-              <span className="text-white">Inteligente e Instantânea</span>
+              <span className="text-white">Triagem de Currículos </span>
+              <br className="hidden md:block" />
+              <span className="gradient-text glow-purple font-extrabold">100% Automática</span>
             </motion.h1>
 
             <motion.p 
               variants={itemVariants}
-              className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg"
+              className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-xl"
             >
-              Envie currículos pelo Telegram. Deixe a IA do Talent Scan ler, analisar e organizar os melhores candidatos diretamente em suas planilhas. Tudo no automático.
+              Faça upload de currículos diretamente no seu painel. Deixe nossa IA ler, analisar e rankear os melhores candidatos para as suas vagas. Privado, rápido e inteligente.
             </motion.p>
 
             <motion.div 
               variants={itemVariants}
-              className="flex flex-col sm:flex-row gap-4 pt-4"
+              className="flex flex-col sm:flex-row gap-4 pt-2"
             >
               <motion.a
-                href="https://web.telegram.org/a/#8790543248"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary text-lg px-10 py-4 flex items-center justify-center gap-3"
+                href="/login"
+                className="btn-primary text-lg px-8 py-4 flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(139,92,246,0.4)]"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Testar agora no Telegram
+                Acessar Plataforma <Zap size={20} className="text-yellow-300" />
               </motion.a>
               <motion.button 
-                className="btn-secondary text-lg px-10 py-4"
+                className="btn-secondary text-lg px-8 py-4 glass border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Ver Demo
+                Agendar Demo
               </motion.button>
             </motion.div>
 
             <motion.div 
               variants={itemVariants}
-              className="flex flex-col gap-3 pt-8 border-t border-dark-border"
+              className="flex flex-col gap-4 pt-8 border-t border-white/10 mt-4"
             >
-              <p className="text-sm text-gray-400">CONFIADO POR</p>
+              <p className="text-xs font-bold tracking-widest text-gray-500 uppercase">Por que escolher o Talent Scan?</p>
               <div className="flex gap-6 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-purple-main"></div>
-                  <span className="text-sm">90% mais rápido</span>
+                <div className="flex items-center gap-2 glass px-4 py-2 rounded-lg bg-white/5">
+                  <Timer size={16} className="text-purple-400" />
+                  <span className="text-sm font-medium text-gray-200">90% mais rápido</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-purple-light"></div>
-                  <span className="text-sm">Sem instalação</span>
+                <div className="flex items-center gap-2 glass px-4 py-2 rounded-lg bg-white/5">
+                  <CheckCircle size={16} className="text-green-400" />
+                  <span className="text-sm font-medium text-gray-200">Sem instalação</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-purple-dark"></div>
-                  <span className="text-sm">Powered by IA</span>
+                <div className="flex items-center gap-2 glass px-4 py-2 rounded-lg bg-white/5">
+                  <BrainCircuit size={16} className="text-blue-400" />
+                  <span className="text-sm font-medium text-gray-200">Powered by IA Local</span>
                 </div>
               </div>
             </motion.div>
@@ -301,25 +322,25 @@ const Stats = () => {
 
   const stats = [
     {
-      icon: "lightning",
+      icon: <Zap size={40} className="text-yellow-400" />,
       label: "Tempo Economizado",
       value: "80%",
       description: "redução no tempo de triagem"
     },
     {
-      icon: "check",
+      icon: <CheckCircle2 size={40} className="text-green-400" />,
       label: "Taxa de Acerto",
       value: "98%",
       description: "de precisão nas análises"
     },
     {
-      icon: "check",
+      icon: <TrendingUp size={40} className="text-purple-400" />,
       label: "ROI Médio",
       value: "12x",
       description: "retorno do investimento"
     },
     {
-      icon: "check",
+      icon: <Timer size={40} className="text-cyan-400" />,
       label: "Velocidade",
       value: "<10s",
       description: "por CV analisado"
@@ -366,8 +387,10 @@ const Stats = () => {
               whileHover={{ y: -5, transition: { duration: 0.3 } }}
             >
               <div className="glass p-6 rounded-xl text-center group hover:border-purple-main transition-all duration-300">
-                <div className="text-4xl mb-4">{stat.icon}</div>
-                <p className="text-4xl md:text-5xl font-bold gradient-text mb-2">{stat.value}</p>
+                <div className="mb-4 flex justify-center transform group-hover:scale-110 transition-transform duration-300">
+                  {stat.icon}
+                </div>
+                <p className="text-4xl md:text-5xl font-bold gradient-text mb-2 drop-shadow-md">{stat.value}</p>
                 <p className="font-semibold text-white mb-2">{stat.label}</p>
                 <p className="text-sm text-gray-400">{stat.description}</p>
               </div>
@@ -417,20 +440,20 @@ const HowItWorks = () => {
   const steps = [
     {
       number: 1,
-      title: "Upload via Telegram",
-      description: "O usuário envia o PDF do CV diretamente pelo Telegram.",
+      title: "Upload Direto",
+      description: "O usuário faz o envio do currículo diretamente pela interface segura do sistema.",
       color: "from-purple-main to-purple-light",
     },
     {
       number: 2,
-      title: "Análise com IA + n8n",
-      description: "O cérebro do Talent Scan extrai as habilidades e faz o match inteligente.",
+      title: "Análise com IA Local",
+      description: "O motor inteligente do Talent Scan extrai as habilidades e analisa a fundo o candidato.",
       color: "from-purple-light to-purple-dark",
     },
     {
       number: 3,
-      title: "Resultados Organizados",
-      description: "Os dados caem estruturados e ranqueados na sua planilha automaticamente.",
+      title: "Resultados Instantâneos",
+      description: "Os dados são organizados e vinculados automaticamente às vagas da sua empresa.",
       color: "from-purple-dark to-purple-main",
     },
   ]
@@ -561,20 +584,20 @@ const Benefits = () => {
       description: "Algoritmos avançados garantem matching de candidatos mais precisos.",
     },
     {
-      title: "Sem Instalação",
-      description: "Funciona 100% via Telegram. Não precisa instalar nada complexo.",
+      title: "Fácil Acesso",
+      description: "Acesse e gerencie todos os candidatos direto do seu navegador.",
     },
     {
       title: "Totalmente Automático",
-      description: "Do upload do CV até a planilha preenchida, tudo roda sozinho.",
+      description: "Do upload do CV à extração de competências, tudo roda sozinho.",
     },
     {
       title: "Economize Recursos",
       description: "Reduz custos com triagem manual e aumenta a produtividade do RH.",
     },
     {
-      title: "Integração com Sheets",
-      description: "Resultados organizados e ranqueados direto em sua planilha Google.",
+      title: "Análise Centralizada",
+      description: "Resultados organizados e vinculados automaticamente às vagas abertas.",
     },
   ]
 
@@ -692,7 +715,7 @@ const Testimonials = () => {
       name: "Ana Costa",
       role: "CEO - HR Solutions",
       company: "RHPro",
-      text: "É exatamente o que procurávamos. A integração com Google Sheets é perfeita.",
+      text: "É exatamente o que procurávamos. Ter a Inteligência Artificial rodando no nosso próprio servidor mudou o jogo da privacidade.",
       rating: 5,
       avatar: "AC"
     },
@@ -799,7 +822,111 @@ const Testimonials = () => {
   )
 }
 
+const ResumeBuilderCTA = () => {
+  const [ref, setRef] = useState(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    if (!ref) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true)
+      }
+    }, { threshold: 0.1 })
+    observer.observe(ref)
+    return () => observer.disconnect()
+  }, [ref])
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  }
+
+  const features = [
+    { icon: <FileText size={24} />, title: 'Formulário Inteligente', desc: 'Preencha passo a passo com um formulário intuitivo e organizado' },
+    { icon: <Sparkles size={24} />, title: 'Análise com IA', desc: 'Receba um score instantâneo e dicas para melhorar seu currículo' },
+    { icon: <CheckCircle2 size={24} />, title: 'Download em PDF', desc: 'Baixe seu currículo profissional pronto para enviar às empresas' },
+  ]
+
+  return (
+    <section id="criar-curriculo" className="relative py-20 md:py-32 overflow-hidden" ref={el => el && setRef(el)}>
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-0 w-[600px] h-[600px] bg-purple-main/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-0 w-[600px] h-[600px] bg-violet-600/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <motion.div
+        className="relative z-10 container mx-auto px-4 max-w-6xl"
+        variants={containerVariants}
+        initial="hidden"
+        animate={isVisible ? "visible" : "hidden"}
+      >
+        <motion.div variants={itemVariants} className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium mb-6">
+            <Sparkles size={16} />
+            Novo! Crie seu currículo gratuitamente
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Monte seu <span className="gradient-text">Currículo Profissional</span>
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Crie um currículo impressionante em minutos. Preencha, visualize em tempo real, 
+            baixe em PDF ou analise com nossa IA — tudo gratuito.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              whileHover={{ y: -5, transition: { duration: 0.3 } }}
+            >
+              <div className="glass p-6 rounded-2xl h-full text-center group hover:border-purple-main transition-all duration-300">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-purple-main to-purple-light flex items-center justify-center mx-auto mb-4 text-white transform group-hover:scale-110 transition-transform duration-300">
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
+                <p className="text-gray-400 text-sm">{feature.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div variants={itemVariants} className="text-center">
+          <motion.a
+            href="/criar-curriculo"
+            className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-3"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <FileText size={22} />
+            Criar Meu Currículo Agora
+          </motion.a>
+          <p className="text-gray-500 text-sm mt-4">100% gratuito • Sem cadastro necessário • Download instantâneo</p>
+        </motion.div>
+      </motion.div>
+    </section>
+  )
+}
+
 const Pricing = () => {
+
   const [ref, setRef] = useState(null)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -1204,10 +1331,10 @@ const TechStack = () => {
   }
 
   const techStack = [
-    { name: "n8n", description: "Automação e orquestração" },
-    { name: "OpenAI", description: "IA avançada" },
-    { name: "Telegram", description: "Interface amigável" },
-    { name: "Google Sheets", description: "Banco de dados" },
+    { name: "React 18", description: "Interface fluida e reativa" },
+    { name: "Ollama (IA Local)", description: "Inteligência Artificial sem limites" },
+    { name: "Supabase", description: "Banco de dados e Autenticação" },
+    { name: "Node.js", description: "Backend de alta performance" },
   ]
 
   return (
@@ -1227,10 +1354,10 @@ const TechStack = () => {
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">Tech Stack Poderoso</span>
+            <span className="gradient-text">Nossa Infraestrutura</span>
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Powered by n8n, OpenAI, Telegram & Google Sheets
+            100% Integrado. Processamento local, seguro e escalável.
           </p>
         </motion.div>
 
@@ -1258,10 +1385,10 @@ const TechStack = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex-1 flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-main to-purple-light flex items-center justify-center">
-                <span className="text-2xl font-bold">Tg</span>
+                <span className="text-2xl font-bold">📄</span>
               </div>
-              <h4 className="font-semibold text-white">Telegram Input</h4>
-              <p className="text-gray-400 text-sm text-center">Usuário envia CV</p>
+              <h4 className="font-semibold text-white">Upload Direto</h4>
+              <p className="text-gray-400 text-sm text-center">Via Dashboard</p>
             </div>
 
             <div className="hidden md:block text-purple-light px-4">
@@ -1270,10 +1397,10 @@ const TechStack = () => {
 
             <div className="flex-1 flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-dark to-purple-main flex items-center justify-center">
-                <span className="text-2xl font-bold">AI</span>
+                <span className="text-2xl font-bold">🧠</span>
               </div>
-              <h4 className="font-semibold text-white">n8n + IA</h4>
-              <p className="text-gray-400 text-sm text-center">Análise automática</p>
+              <h4 className="font-semibold text-white">Ollama IA</h4>
+              <p className="text-gray-400 text-sm text-center">Extração & Match</p>
             </div>
 
             <div className="hidden md:block text-purple-main px-4">
@@ -1282,10 +1409,10 @@ const TechStack = () => {
 
             <div className="flex-1 flex flex-col items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-light to-purple-main flex items-center justify-center">
-                <span className="text-2xl font-bold">GS</span>
+                <span className="text-2xl font-bold">📊</span>
               </div>
-              <h4 className="font-semibold text-white">Google Sheets</h4>
-              <p className="text-gray-400 text-sm text-center">Dados organizados</p>
+              <h4 className="font-semibold text-white">Vagas e Métricas</h4>
+              <p className="text-gray-400 text-sm text-center">Score Calculado</p>
             </div>
           </div>
 
@@ -1316,9 +1443,9 @@ const TechStack = () => {
           <div className="flex gap-4 items-start">
             <div className="w-6 h-6 bg-gradient-to-r from-purple-main to-purple-light rounded flex-shrink-0 mt-1"></div>
             <div>
-              <h4 className="font-bold text-white mb-2">Inteligência Integrada</h4>
+              <h4 className="font-bold text-white mb-2">Privacidade Total e Processamento Local</h4>
               <p className="text-gray-400">
-                Todos os serviços trabalham em perfeita harmonia. O Telegram captura o input, n8n orquestra o workflow, OpenAI analisa os currículos com IA, e Google Sheets armazena os resultados estruturados.
+                Abandonamos as APIs de terceiros. Seu fluxo é direto: Faça o upload pela nossa interface web, deixe nosso motor de Inteligência Artificial Local (Ollama) fazer a triagem a fundo e visualize os matches instantâneos com as suas vagas. Tudo fica na sua própria infraestrutura.
               </p>
             </div>
           </div>
@@ -1424,7 +1551,7 @@ const Contact = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {loading ? '⏳ Enviando...' : '✉️ Inscrever'}
+                {loading ? <><Loader2 className="inline-block w-4 h-4 mr-2 animate-spin" /> Enviando...</> : <><Mail className="inline-block w-4 h-4 mr-2" /> Inscrever</>}
               </motion.button>
             </form>
           ) : (
@@ -1434,7 +1561,7 @@ const Contact = () => {
               className="text-center py-4"
             >
               <p className="text-lg text-green-400 font-semibold">
-                ✅ Inscrição realizada com sucesso!
+                <CheckCircle className="inline-block w-5 h-5 mr-2 text-green-400" /> Inscrição realizada com sucesso!
               </p>
               <p className="text-gray-400 mt-2">
                 Verifique sua caixa de entrada para receber atualizações.
@@ -1457,19 +1584,19 @@ const Contact = () => {
               href="#" 
               className="text-gray-400 hover:text-purple-light transition-colors duration-300 text-sm font-medium"
             >
-              🐦 Twitter
+              <MessageCircle className="inline-block w-4 h-4 mr-2" /> Twitter
             </a>
             <a 
               href="#" 
               className="text-gray-400 hover:text-purple-light transition-colors duration-300 text-sm font-medium"
             >
-              💼 LinkedIn
+              <Briefcase className="inline-block w-4 h-4 mr-2" /> LinkedIn
             </a>
             <a 
               href="#" 
               className="text-gray-400 hover:text-purple-light transition-colors duration-300 text-sm font-medium"
             >
-              📖 Blog
+              <BookOpen className="inline-block w-4 h-4 mr-2" /> Blog
             </a>
           </div>
         </motion.div>
@@ -1574,13 +1701,11 @@ const Footer = () => {
             Comece a usar <span className="gradient-text">Talent Scan</span> agora
           </h3>
           <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
-            Teste grátis por 14 dias. Sem cartão de crédito necessário.
+            Solução 100% gratuita rodando localmente na sua máquina.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <motion.a
-              href="https://web.telegram.org/a/#8790543248"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/login"
               className="btn-primary px-8 py-3"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -1618,11 +1743,11 @@ const Footer = () => {
         </motion.div>
 
         <div
-          className="fixed bottom-0 left-0 w-40 h-40 border border-purple-main rounded-full opacity-5 pointer-events-none"
+          className="absolute bottom-0 left-0 w-40 h-40 border border-purple-main rounded-full opacity-5 pointer-events-none"
           style={{ marginLeft: "-80px", marginBottom: "-80px" }}
         ></div>
         <div
-          className="fixed bottom-0 right-0 w-40 h-40 border border-purple-dark rounded-full opacity-5 pointer-events-none"
+          className="absolute bottom-0 right-0 w-40 h-40 border border-purple-dark rounded-full opacity-5 pointer-events-none"
           style={{ marginRight: "-80px", marginBottom: "-80px" }}
         ></div>
       </motion.div>
@@ -1653,6 +1778,7 @@ function App() {
       <HowItWorks />
       <Benefits />
       <Testimonials />
+      <ResumeBuilderCTA />
       <Pricing />
       <FAQ />
       <TechStack />

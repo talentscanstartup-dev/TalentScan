@@ -5,9 +5,33 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import helmet from 'helmet'
+import multer from 'multer'
+import { createRequire } from 'module'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import { createClient } from '@supabase/supabase-js'
+
+const require = createRequire(import.meta.url)
+const pdfParseModule = require('pdf-parse')
+const pdfParse = pdfParseModule.default || pdfParseModule
+const mammoth = require('mammoth')
+const Tesseract = require('tesseract.js')
 
 // Carregar variáveis de ambiente
 dotenv.config()
+
+// Configurações
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_KEY
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null
+
+// As chaves serão obtidas por requisição para suportar fallback
+const getApiKeys = () => [
+  process.env['GEMINI-API-SUACHAVEAQUI'],
+  process.env['GEMINI-API-SUACHAVEAQUI2'],
+  process.env['GEMINI-API-SUACHAVEAQUI3'],
+  process.env.GEMINI_API_KEY
+].filter(Boolean);
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } })
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -130,6 +154,213 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
   })
+})
+
+/**
+ * POST /api/analyze-cv
+ * Recebe o arquivo PDF do currículo, extrai o texto e processa com Gemini AI.
+ */
+app.post('/api/analyze-cv', upload.single('file'), async (req, res) => {
+  try {
+    const timestamp = new Date().toISOString()
+    console.log('\n' + '='.repeat(70))
+    console.log('NOVO CV RECEBIDO: POST /api/analyze-cv')
+    console.log('='.repeat(70))
+    console.log(`Timestamp: ${timestamp}`)
+
+    if (!req.file) {
+      console.log('Erro: Nenhum arquivo enviado.')
+      return res.status(400).json({ success: false, error: 'Nenhum arquivo enviado.' })
+    }
+
+    const apiKeys = getApiKeys()
+    if (apiKeys.length === 0) {
+      console.log('Erro: Nenhuma chave do Gemini configurada no .env')
+      return res.status(500).json({ success: false, error: 'Chaves do Gemini não configuradas no servidor.' })
+    }
+
+    console.log(`Arquivo recebido: ${req.file.originalname} (${req.file.size} bytes)`)
+
+    // 1. Extrair Texto do Arquivo
+    console.log('Iniciando extração de texto...')
+    let cvText = ''
+    try {
+      const mimeType = req.file.mimetype;
+      if (mimeType === 'application/pdf') {
+        const pdfData = await pdfParse(req.file.buffer)
+        cvText = pdfData.text
+      } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimeType === 'application/msword') {
+        const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+        cvText = result.value;
+      } else if (mimeType.startsWith('image/')) {
+        const { data: { text } } = await Tesseract.recognize(req.file.buffer, 'por+eng');
+        cvText = text;
+      } else {
+        return res.status(400).json({ success: false, error: 'Formato não suportado. Envie PDF, DOCX ou Imagens (JPG/PNG).' });
+      }
+      console.log(`Texto extraído: ${cvText.length} caracteres.`)
+    } catch (extractError) {
+      console.error('Erro na extração de texto (corrompido/ilegível):', extractError.message)
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Não foi possível ler o arquivo enviado. Ele pode estar corrompido ou o formato é inválido.' 
+      })
+    }
+
+    // 2. Chamar IA Local (Ollama)
+    console.log(`Chamando IA Local via Ollama...`)
+    
+    const prompt = `Você é um recrutador profissional de RH.
+
+Analise o documento abaixo e responda SOMENTE em JSON válido.
+
+Currículo:
+${cvText}
+
+Regras Cruciais:
+1. Validação: Se o documento não for um currículo real ou profissional (ex: receita de bolo, bula, texto aleatório), retorne "is_valid_resume": false e não preencha os outros campos.
+2. Anti-Cheat (Keyword Stuffing): Ignore blocos massivos e desconexos de palavras-chave inseridas sem contexto. Se você detectar listas enormes de dezenas de ferramentas jogadas apenas para ludibriar o sistema (letras invisíveis/escondidas), penalize a nota drasticamente e indique nos pontos fracos a tentativa de manipulação do sistema.
+3. Roteiro de Entrevista: Crie 3 perguntas (interview_questions) com base nas fraquezas ou forças do candidato para explorá-las na entrevista.
+4. A nota deve ser de 0 a 10.
+5. Não escreva NADA fora do formato JSON.
+
+Formato obrigatório:
+{
+  "is_valid_resume": true,
+  "nome": "",
+  "nota": 0,
+  "nivel": "",
+  "area": "",
+  "pontos_fortes": "",
+  "pontos_fracos": "",
+  "resumo": "",
+  "probabilidade_contratacao": "",
+  "interview_questions": ["", "", ""]
+}`
+
+    let parsedData = null
+
+    try {
+      const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+      const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5-coder';
+
+      const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: DEFAULT_MODEL,
+          prompt: prompt,
+          stream: false,
+          format: "json",
+          options: {
+            temperature: 0.2
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama falhou: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      let text = result.response.trim();
+      text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+      
+      parsedData = JSON.parse(text);
+      if (parsedData.is_valid_resume === false) {
+        throw new Error('Documento rejeitado pela IA: O arquivo enviado não é um currículo válido.');
+      }
+      console.log(`JSON processado pela IA Local com sucesso:`, parsedData.nome);
+    } catch (err) {
+      console.error(`Falha no processamento da IA Local:`, err.message);
+      throw new Error(`Falha no motor de IA Local: ` + err.message);
+    }
+
+    if (!parsedData) {
+      throw new Error(`A IA retornou um formato vazio.`);
+    }
+
+    // 3. Salvar no Supabase (se configurado)
+    let candidatoId = null
+    if (supabase) {
+      console.log('Salvando no Supabase...')
+      
+      // O userId real ou um mock temporário
+      const userId = req.body.userId
+      const token = req.body.token
+      
+      let dbClient = supabase
+      if (token) {
+        dbClient = createClient(supabaseUrl, supabaseKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } }
+        })
+      }
+      
+      if (!userId) {
+         console.warn('Aviso: userId não fornecido na requisição. A inserção pode falhar caso haja política de restrição NOT NULL.')
+      }
+
+      // 1. Inserir CV
+      const { data: cv, error: cvError } = await dbClient
+        .from('cvs')
+        .insert({
+          user_id: userId,
+          candidate_name: parsedData.nome || 'N/A',
+          file_url: 'processamento_local',
+          file_name: req.file.originalname,
+          file_size: req.file.size,
+          status: 'analyzed',
+          created_at: timestamp
+        })
+        .select()
+
+      if (cvError) {
+        console.error('Erro ao salvar CV no Supabase:', cvError.message)
+      } else if (cv && cv.length > 0) {
+        const cvId = cv[0].id
+        
+        // 2. Inserir Candidato
+        const { data: candidato, error: candError } = await dbClient
+          .from('candidates')
+          .insert({
+            cv_id: cvId,
+            user_id: userId,
+            full_name: parsedData.nome || 'N/A',
+            email: parsedData.email || null,
+            phone: parsedData.telefone || null,
+            location: parsedData.area || null,
+            professional_summary: parsedData.resumo || null,
+            skills: parsedData.pontos_fortes ? [parsedData.pontos_fortes] : [],
+            ai_score: parsedData.nota || 0,
+            ai_analysis: parsedData,
+            created_at: timestamp
+          })
+          .select()
+        
+        if (candError) {
+          console.error('Erro ao salvar candidato no Supabase:', candError.message)
+        } else if (candidato && candidato.length > 0) {
+          candidatoId = candidato[0].id
+          console.log(`Salvo no Supabase com CV ID: ${cvId} e Candidato ID: ${candidatoId}`)
+        }
+      }
+    } else {
+      console.log('Aviso: Supabase não configurado neste servidor, dados não salvos no banco central.')
+    }
+
+    console.log('Processo concluído com sucesso.\n' + '='.repeat(70) + '\n')
+    res.json({
+      success: true,
+      data: parsedData,
+      candidato_id: candidatoId
+    })
+
+  } catch (error) {
+    console.error('Erro ao processar currículo:', error)
+    res.status(500).json({ success: false, error: 'Erro interno ao processar currículo: ' + error.message })
+  }
 })
 
 /**

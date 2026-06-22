@@ -197,6 +197,8 @@ export const checkCompanyOwnership = async (req, res, next) => {
  * Middleware: Apenas Super Admin pode acessar
  */
 export const requireSuperAdmin = checkRole(['SUPER_ADMIN'])
+export const requireAuth = verifyToken
+export const requireAdmin = checkRole(['SUPER_ADMIN', 'ADMIN'])
 
 /**
  * Middleware: Apenas empresa aprovada ou cliente

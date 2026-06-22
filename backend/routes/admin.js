@@ -14,6 +14,7 @@ import {
   getAuditLogs,
   sendNotification,
   getNotificationLogs,
+  getOllamaStatus,
 } from '../controllers/adminController.js'
 import {
   verifyToken,
@@ -106,5 +107,11 @@ router.post('/notifications', sendNotification)
  * Visualizar histórico de notificações enviadas
  */
 router.get('/notifications/logs', getNotificationLogs)
+
+/**
+ * GET /admin/ollama-status
+ * Status do motor IA local
+ */
+router.get('/ollama-status', getOllamaStatus)
 
 export default router

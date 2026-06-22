@@ -97,21 +97,31 @@ const emailTemplates = {
 /**
  * Enviar email
  */
-export const sendEmailNotification = async ({ to, type, data }) => {
+export const sendEmailNotification = async ({ to, type, data, subject: manualSubject, html: manualHtml }) => {
   try {
     if (!to) {
       console.warn('Email "to" nao fornecido')
       return false
     }
 
-    const template = emailTemplates[type]
+    let subject = manualSubject
+    let html = manualHtml
 
-    if (!template) {
-      console.warn(`Template de email nao encontrado: ${type}`)
-      return false
+    if (type) {
+      const template = emailTemplates[type]
+      if (template) {
+        const res = template(data)
+        subject = res.subject
+        html = res.html
+      } else {
+        console.warn(`Template de email nao encontrado: ${type}`)
+      }
     }
 
-    const { subject, html } = template(data)
+    if (!subject || !html) {
+      console.warn('Assunto ou HTML nao fornecido para envio de email')
+      return false
+    }
 
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,

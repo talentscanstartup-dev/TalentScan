@@ -18,6 +18,9 @@ export const n8nService = {
   // Disparar análise de CV
   async analyzeCv(cvData) {
     try {
+      if (!n8nConfig.webhooks.analysis) {
+        throw new Error('Análise de CV via n8n: Webhook não configurado nas variáveis de ambiente.')
+      }
       const response = await fetch(n8nConfig.webhooks.analysis, {
         method: 'POST',
         headers: {
@@ -45,6 +48,9 @@ export const n8nService = {
   // Notificar upload de CV
   async notifyCvUpload(uploadData) {
     try {
+      if (!n8nConfig.webhooks.cvUpload) {
+        throw new Error('Notificação de upload via n8n: Webhook não configurado.')
+      }
       const response = await fetch(n8nConfig.webhooks.cvUpload, {
         method: 'POST',
         headers: {
@@ -71,6 +77,9 @@ export const n8nService = {
   // Sincronizar com Telegram
   async syncTelegram(telegramData) {
     try {
+      if (!n8nConfig.webhooks.telegram) {
+        throw new Error('Sincronização de Telegram via n8n: Webhook não configurado.')
+      }
       const response = await fetch(n8nConfig.webhooks.telegram, {
         method: 'POST',
         headers: {
@@ -98,6 +107,9 @@ export const n8nService = {
   // Enviar dado customizado para n8n
   async sendData(webhookUrl, payload) {
     try {
+      if (!webhookUrl) {
+        throw new Error('URL do Webhook do n8n não fornecida.')
+      }
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {

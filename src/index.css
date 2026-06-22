@@ -10,27 +10,106 @@
 
 html {
   scroll-behavior: smooth;
+  min-height: 100vh;
+  height: 100%;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  transition: background 300ms ease-in-out;
+}
+
+/* TEMA PREMIUM - Default (Dark & Purple) */
+:root,
+[data-theme="default"] {
+  --bg-primary: #050505;
+  --bg-secondary: #121212;
+  --bg-tertiary: #000000;
+  --bg-gradient: linear-gradient(135deg, #000000 0%, #0f0f15 50%, #050505 100%);
+  --bg-page: #0a0a0a;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --card-bg: rgba(20, 20, 20, 0.65);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --accent-color: #8b5cf6;
+  --accent-color-custom: #a855f7;
+}
+
+/* TEMA DARK - Blue/Deep */
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-secondary: #18181b;
+  --bg-tertiary: #09090b;
+  --bg-gradient: linear-gradient(135deg, #09090b 0%, #18181b 50%, #000000 100%);
+  --bg-page: #000000;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --card-bg: rgba(24, 24, 27, 0.65);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent-color: #6366f1;
+  --accent-color-custom: #818cf8;
+}
+
+/* TEMA LIGHT */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f1f3f5;
+  --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #f1f3f5 100%);
+  --bg-page: #f5f3ff;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --border-color: rgba(139, 92, 246, 0.12);
+  --accent-color: #7c3aed;
+  --accent-color-custom: #8b5cf6;
 }
 
 body {
-  @apply text-white font-sans overflow-x-hidden;
-  /* Fundo com gradiente escuro e profundo, combinando com o roxo */
-  background: linear-gradient(135deg, #09090e 0%, #17102b 50%, #0c0b14 100%);
-  background-attachment: fixed;
+  @apply font-sans overflow-x-hidden transition-all duration-300;
+  color: var(--text-primary);
+  min-height: 100vh;
+  background: transparent;
 }
 
-/* Glassmorphism effect */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+[data-theme="light"] body {
+  @apply text-gray-900;
+}
+
+[data-theme="dark"] body,
+[data-theme="default"] body {
+  @apply text-white;
+}
+
+/* Glassmorphism effect Premium */
 .glass {
-  @apply bg-white border border-white rounded-xl;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-color: rgba(255, 255, 255, 0.2);
+  @apply rounded-xl transition-all duration-500 ease-out;
+  background-color: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+}
+
+.glass:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 15px 50px -5px rgba(139, 92, 246, 0.25);
+  transform: translateY(-2px);
 }
 
 /* Glow effect for purple elements */
 .glow-purple {
   text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="light"] .glow-purple {
+  text-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
 }
 
 .glow-purple-light {
@@ -46,21 +125,68 @@ body {
   background-clip: text;
 }
 
-/* Button styles */
+[data-theme="light"] .gradient-text {
+  background: linear-gradient(to right, #7c3aed, #6d28d9, #5b21b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles com cores customizadas */
 .btn-primary {
-  @apply px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95;
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  @apply px-8 py-3 rounded-xl font-bold tracking-wide transition-all duration-300 relative overflow-hidden;
+  background: linear-gradient(135deg, var(--accent-color-custom) 0%, rgba(139, 92, 246, 0.8) 100%);
   color: white;
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  transform-style: preserve-3d;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(255,255,255,0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 .btn-primary:hover {
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-primary:hover::after {
+  opacity: 1;
+}
+
+.btn-primary:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+[data-theme="light"] .btn-primary {
+  background: linear-gradient(135deg, var(--accent-color-custom) 0%, rgba(124, 58, 237, 0.7) 100%);
 }
 
 .btn-secondary {
-  @apply px-8 py-3 rounded-lg font-semibold border-2 border-purple-main text-purple-light transition-all duration-300 hover:bg-purple-main hover:text-white;
+  @apply px-8 py-3 rounded-lg font-semibold border-2 transition-all duration-300;
+  border-color: var(--accent-color-custom);
+  color: var(--accent-color-custom);
   background: rgba(139, 92, 246, 0.05);
+}
+
+.btn-secondary:hover {
+  background-color: var(--accent-color-custom);
+  color: white;
+}
+
+[data-theme="light"] .btn-secondary {
+  color: var(--accent-color-custom);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background-color: var(--accent-color-custom);
+  color: white;
 }
 
 /* Scrollbar styling */
@@ -73,11 +199,21 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-purple-main rounded-full;
+  @apply rounded-full transition-all duration-300;
+  background-color: var(--accent-color-custom);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-purple-light;
+  background-color: rgba(167, 139, 250, 0.8);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
 }
 
 /* Enhanced Stars background animation with Parallax */
@@ -97,12 +233,12 @@ body {
   background-size: 200px 200px;
   pointer-events: none;
   z-index: -1;
-  /* Animação suave da primeira camada */
-  animation: starMovement 60s linear infinite;
-  opacity: 0.7;
 }
 
-/* Segunda camada de estrelas (menores e mais lentas) para dar profundidade */
+[data-theme="light"] .stars {
+  display: none;
+}
+
 .stars::after {
   content: "";
   position: absolute;
@@ -125,12 +261,7 @@ a, button {
   transition: all 0.3s ease-in-out;
 }
 
-/* GPU acceleration for animations */
-.glass, button, a {
-  transform: translateZ(0);
-  will-change: auto;
-}
-
+/* GPU acceleration for animations - only on active state */
 button:active, a:active {
   will-change: transform;
 }
@@ -187,6 +318,11 @@ button:hover, a:hover {
   filter: brightness(1.1);
 }
 
+[data-theme="light"] button:hover,
+[data-theme="light"] a:hover {
+  filter: brightness(0.95);
+}
+
 /* Mobile optimization */
 @media (max-width: 768px) {
   body {
@@ -195,5 +331,84 @@ button:hover, a:hover {
   
   .glass {
     backdrop-filter: blur(8px);
+  }
+}
+
+/* Settings Panel slide-in animation */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Light theme: Glass card override */
+[data-theme="light"] .glass {
+  background-color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(139, 92, 246, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .glass:hover {
+  border-color: rgba(139, 92, 246, 0.25);
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.08);
+}
+
+/* Light theme: navbar and text overrides */
+[data-theme="light"] .text-white {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .text-gray-400,
+[data-theme="light"] .text-gray-500 {
+  color: var(--text-secondary);
+}
+
+/* ═══════════ Print Styles for Resume Builder ═══════════ */
+@media print {
+  /* Hide everything except the resume */
+  body * {
+    visibility: hidden;
+  }
+  
+  .resume-print-area,
+  .resume-print-area * {
+    visibility: visible !important;
+  }
+  
+  .resume-print-area {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20mm;
+    background: white !important;
+    color: #1a1a1a !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Reset backgrounds for print */
+  html, body {
+    background: white !important;
+  }
+
+  /* Ensure proper page breaks */
+  .resume-print-area h2 {
+    page-break-after: avoid;
+  }
+
+  .resume-print-area .mb-4,
+  .resume-print-area .mb-6 {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 0;
+    size: A4;
   }
 }

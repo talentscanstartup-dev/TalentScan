@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { auth } from '../config/supabase'
+import { auth, isSuperAdmin } from '../config/supabase'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -28,9 +28,14 @@ export default function LoginPage() {
       return
     }
 
-    // Redirecionar para dashboard ou página protegida
+    // Redirecionar super admin para admin, outros para dashboard
     setTimeout(() => {
-      navigate('/dashboard')
+      setIsLoading(false)
+      if (isSuperAdmin(email)) {
+        navigate('/admin')
+      } else {
+        navigate('/dashboard')
+      }
     }, 500)
   }
 

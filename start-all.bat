@@ -1,0 +1,16 @@
+@echo off
+echo Iniciando todos os servicos do Talent Scan...
+
+echo Iniciando Ollama...
+start "Ollama Service" cmd /k "ollama serve"
+
+echo Iniciando Backend...
+start "Backend Service" cmd /k "cd backend && npm run dev"
+
+echo Iniciando Webhook Server...
+start "Webhook Service" cmd /k "cd webhook-server && npm run dev"
+
+echo Iniciando Frontend...
+start "Frontend Service" cmd /k "npm run dev"
+
+echo Todos os servicos foram iniciados em novas janelas!

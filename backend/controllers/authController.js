@@ -48,8 +48,7 @@ export const registerAsClient = async (req, res) => {
     // Hash da senha
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Criar usuário no Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -163,8 +162,7 @@ export const registerAsCompany = async (req, res) => {
       })
     }
 
-    // Criar usuário no Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUpWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
     })
@@ -303,11 +301,10 @@ export const login = async (req, res) => {
       })
     }
 
-    // Autenticar no Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword(
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
-      password
-    )
+      password,
+    })
 
     if (authError) {
       return res.status(401).json({

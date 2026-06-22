@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { n8nService } from '../config/n8n'
+import { supabase } from '../config/supabase'
 
-export default function CvUploadComponent() {
+export default function CvUploadComponent({ onUploadSuccess }) {
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -41,40 +41,58 @@ export default function CvUploadComponent() {
       return
     }
 
-    if (!file.type.includes('pdf') && !file.type.includes('word')) {
-      setError('Apenas arquivos PDF e DOCX são permitidos')
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ]
+    const fileExtension = file.name.split('.').pop().toLowerCase()
+    const isAllowedFormat = allowedTypes.includes(file.type) || ['pdf', 'doc', 'docx'].includes(fileExtension)
+
+    if (!isAllowedFormat) {
+      setError('Atualmente, apenas arquivos PDF, DOC e DOCX são suportados.')
       return
     }
 
     setLoading(true)
     setError('')
-    setMessage('')
+    setMessage('Enviando currículo para análise...')
 
     try {
-      // Aqui você pode fazer upload para Supabase Storage primeiro
-      // e depois chamar o n8n com a URL
-
-      const uploadData = {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        uploadedAt: new Date().toISOString(),
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
+      
+      const formData = new FormData()
+      formData.append('file', file)
+      if (user?.id) {
+        formData.append('userId', user.id)
+      }
+      if (session?.access_token) {
+        formData.append('token', session.access_token)
       }
 
-      // Notificar n8n sobre o upload
-      const result = await n8nService.notifyCvUpload(uploadData)
+      const response = await fetch('http://localhost:3001/api/analyze-cv', {
+        method: 'POST',
+        body: formData,
+      })
 
-      if (result.success) {
-        setMessage('✓ CV enviado com sucesso! Análise iniciada...')
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        setMessage(`✓ CV de ${result.data?.nome || 'Candidato'} analisado com sucesso! Nota: ${result.data?.nota}`)
         setFile(null)
-
-        // Disparar análise automática
-        await n8nService.analyzeCv(uploadData)
+        
+        // Atualizar o dashboard com os novos dados
+        if (onUploadSuccess) {
+          setTimeout(() => onUploadSuccess(), 1000)
+        }
       } else {
-        setError('Erro ao enviar CV: ' + result.error)
+        setError('Erro na análise: ' + (result.error || 'Erro desconhecido'))
+        setMessage('')
       }
     } catch (err) {
-      setError('Erro ao fazer upload: ' + err.message)
+      setError('Erro ao comunicar com o servidor: ' + err.message)
+      setMessage('')
     } finally {
       setLoading(false)
     }
@@ -155,11 +173,11 @@ export default function CvUploadComponent() {
           <strong>O que acontece ao enviar:</strong>
         </p>
         <ul className="text-gray-400 text-sm space-y-2 list-disc list-inside">
-          <li>Arquivo é armazenado no Supabase</li>
-          <li>N8N extrai o texto do CV</li>
-          <li>OpenAI analisa os dados</li>
-          <li>Candidato é adicionado ao banco</li>
-          <li>Você recebe um match score</li>
+          <li>O currículo é enviado direto para o nosso servidor.</li>
+          <li>O texto é extraído de forma rápida e segura.</li>
+          <li>A Inteligência Artificial (Gemini) analisa os dados.</li>
+          <li>O candidato estruturado é salvo no banco de dados.</li>
+          <li>A nota e os pontos fortes aparecem na plataforma.</li>
         </ul>
       </div>
     </motion.div>

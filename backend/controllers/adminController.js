@@ -439,6 +439,7 @@ export const getSystemStats = async (req, res) => {
       { count: totalUsers },
       { count: totalCompanies },
       { count: pendingApprovals },
+      { count: approvedCompanies },
     ] = await Promise.all([
       supabase.from('users').select('id', { count: 'exact' }),
       supabase.from('companies').select('id', { count: 'exact' }),
@@ -446,13 +447,17 @@ export const getSystemStats = async (req, res) => {
         .from('approval_requests')
         .select('id', { count: 'exact' })
         .eq('status', 'pending'),
+      supabase
+        .from('companies')
+        .select('id', { count: 'exact' })
+        .eq('status', 'approved'),
     ])
 
     res.json({
       total_users: totalUsers,
       total_companies: totalCompanies,
       pending_approvals: pendingApprovals,
-      approved_companies: totalCompanies - pendingApprovals,
+      approved_companies: approvedCompanies,
       system_health: 'operational',
     })
   } catch (error) {
@@ -544,6 +549,34 @@ export const getNotificationLogs = async (req, res) => {
     })
   } catch (error) {
     console.error('Get notification logs error:', error)
-    res.status(500).json({ error: 'Erro ao obter logs' })
+    res.status(500).json({ error: 'Erro ao buscar logs de notificação' })
+  }
+}
+
+/**
+ * GET /admin/ollama-status
+ * Verifica a saúde do motor de inteligência artificial (Ollama)
+ */
+export const getOllamaStatus = async (req, res) => {
+  try {
+    const response = await fetch('http://127.0.0.1:11434/api/tags');
+    if (!response.ok) throw new Error('Ollama not responding properly');
+    
+    const data = await response.json();
+    
+    return res.json({
+      success: true,
+      status: 'online',
+      models: data.models || [],
+      message: 'Motor de IA Local operando normalmente.'
+    });
+  } catch (error) {
+    return res.json({
+      success: true,
+      status: 'offline',
+      models: [],
+      error: error.message,
+      message: 'Não foi possível conectar ao Ollama. Verifique se o serviço está rodando.'
+    });
   }
 }
